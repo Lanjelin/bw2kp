@@ -6,6 +6,6 @@ services:
     container_name: bitwarden-to-keepass
     volumes:
       - ./exports:/exports
-      - "./bw-config:/root/.config/Bitwarden CLI"
+      - ./bw-config:/root/.config
     env_file:
       - .env

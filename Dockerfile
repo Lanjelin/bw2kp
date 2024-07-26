@@ -18,7 +18,7 @@ RUN apt-get update && \
     pip install --no-cache-dir -r /bitwarden-to-keepass/requirements.txt
 
 VOLUME /exports
-VOLUME /root/.config/Bitwarden\ CLI
+VOLUME /root/.config
 
 SHELL ["/bin/bash", "-c"]
 ENTRYPOINT "/entrypoint.sh"
