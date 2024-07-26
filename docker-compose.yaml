@@ -1,17 +1,11 @@
-version: '3.8'
+name: bw2kp
+
 services:
   bitwarden-to-keepass:
-    build: .
-    command: >
-      bash -c '$BW_PATH config server $BITWARDEN_URL && export BW_SESSION=`$BW_PATH login --raw || $BW_PATH unlock --raw`
-      && $BW_PATH sync
-      && python3 bitwarden-to-keepass.py
-      && $BW_PATH lock'
+    image: ghcr.io/lanjelin/bw2kp
+    container_name: bitwarden-to-keepass
     volumes:
       - ./exports:/exports
-      - 'bw-config:/root/.config/Bitwarden CLI'
+      - "./bw-config:/root/.config/Bitwarden CLI"
     env_file:
       - .env
-
-volumes:
-  bw-config:
