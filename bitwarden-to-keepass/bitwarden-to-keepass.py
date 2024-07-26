@@ -6,13 +6,12 @@ import subprocess
 from argparse import ArgumentParser
 from typing import Dict, List, Optional
 
+import folder as FolderType
+from item import CustomFieldType, Item, ItemType
 from pykeepass import PyKeePass, create_database
 from pykeepass.entry import Entry as KPEntry
 from pykeepass.exceptions import CredentialsError
 from pykeepass.group import Group as KPGroup
-
-import folder as FolderType
-from item import CustomFieldType, Item, ItemType
 
 logging.basicConfig(
     level=logging.INFO,
@@ -185,8 +184,13 @@ def load_folders(folders) -> Dict[str, KPGroup]:
 
     # build up folder tree
     folder_root: FolderType.Folder = FolderType.Folder(None)
-    folder_root.keepass_group = kp.root_group
-    groups_by_id[None] = kp.root_group
+    # if variable set
+    if args.root_group:
+        bw_group = kp.add_group(kp.root_group, args.root_group)
+        folder_root.keepass_group = bw_group
+    else:
+        folder_root.keepass_group = kp.root_group
+    groups_by_id[None] = folder_root.keepass_group
 
     for folder in folders:
         if folder["id"] is not None:
@@ -259,6 +263,11 @@ parser.add_argument(
     "--bw-path",
     help="Path for bw binary",
     default=os.environ.get("BW_PATH", "bw"),
+)
+parser.add_argument(
+    "--root-group",
+    help="Root group to store data from Bitwarden",
+    default=os.environ.get("ROOT_GROUP", None),
 )
 args = parser.parse_args()
 
