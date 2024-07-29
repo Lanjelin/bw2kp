@@ -4,7 +4,7 @@ if [ -z "$DATABASE_PASSWORD" ]; then
 	echo "Need to set DATABASE_PASSWORD"
 	exit 1
 else
-	if test -f "$DATABASE_PASSWORD"; then
+	if [ -f "$DATABASE_PASSWORD" ]; then
 		DATABASE_PASSWORD=$(<"$DATABASE_PASSWORD")
 	fi
 fi
@@ -12,7 +12,7 @@ if [ -z "$BW_CLIENTID" ]; then
 	echo "Need to set BW_CLIENTID"
 	exit 1
 else
-	if test -f "$BW_CLIENTID"; then
+	if [ -f "$BW_CLIENTID" ]; then
 		BW_CLIENTID=$(<"$BW_CLIENTID")
 	fi
 fi
@@ -21,7 +21,7 @@ if [ -z "$BW_CLIENTSECRET" ]; then
 	echo "Need to set BW_CLIENTSECRET"
 	exit 1
 else
-	if test -f "$BW_CLIENTID"; then
+	if [ -f "$BW_CLIENTSECRET" ]; then
 		BW_CLIENTSECRET=$(<"$BW_CLIENTSECRET")
 	fi
 fi
@@ -29,7 +29,7 @@ if [ -z "$BW_PASSWORD" ]; then
 	echo "Need to set BW_PASSWORD"
 	exit 1
 else
-	if test -f "$BW_PASSWORD"; then
+	if [ -f "$BW_PASSWORD" ]; then
 		BW_PASSWORD=$(<"$BW_PASSWORD")
 	fi
 fi
