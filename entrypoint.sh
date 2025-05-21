@@ -35,6 +35,16 @@ fi
 # Default values as fallback
 [ -z "$DATABASE_PATH" ] && export DATABASE_PATH='/exports/bitwarden-export.kdbx'
 [ -z "$BITWARDEN_URL" ] && export BITWARDEN_URL='https://bitwarden.com'
+# Change owner of file, by setting PUID PGID
+check_owner() {
+  local filepath="$1"
+  if [[ -n "$PUID" ]]; then
+    chown "$PUID" "$filepath"
+  fi
+  if [[ -n "$PGID" ]]; then
+    chgrp "$PGID" "$filepath"
+  fi
+}
 # Start Bitwarden Authentication
 echo "Begin Bitwarden authentication."
 bw config server $BITWARDEN_URL >/dev/null
@@ -49,11 +59,14 @@ fi
 # Backup original file if exists
 if [ -f "$DATABASE_PATH" ]; then
   echo "Made a backup of existing database."
-  cp "$DATABASE_PATH" "$DATABASE_PATH"_$(date -u +%Y-%m-%dT%H:%M:%S%Z).bak
+  backup_path="${DATABASE_PATH}_$(date -u +%Y-%m-%dT%H:%M:%S%Z).bak"
+  cp "$DATABASE_PATH" "$backup_path"
+  check_owner "$backup_path"
 fi
 # Run the exporter
 python3 /bitwarden-to-keepass/bitwarden-to-keepass.py --bw-path /usr/bin/bw
 # Cleanup
+check_owner $DATABASE_PATH
 bw lock
 echo ""
 bw logout
