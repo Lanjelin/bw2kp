@@ -5,6 +5,7 @@ import re
 import subprocess
 from argparse import ArgumentParser
 from typing import Dict, List, Optional
+from datetime import datetime
 
 import folder as FolderType
 from item import CustomFieldType, Item, ItemType
@@ -20,7 +21,6 @@ logging.basicConfig(
 )
 
 kp: Optional[PyKeePass] = None
-
 
 def bitwarden_to_keepass(args):
     global kp
@@ -40,6 +40,25 @@ def bitwarden_to_keepass(args):
     except CredentialsError as e:
         logging.error(f"Wrong password for KeePass database: {e}")
         return
+
+    # Archiving old group (pykepass cant handle deletion of binaries properly)
+    if args.root_group is not None:
+        existing_group = next((g for g in kp.root_group.subgroups if g.name == args.root_group), None)
+
+        if existing_group:
+            timestamp = datetime.now().strftime("%Y%m%d")
+            archived_name = f"{args.root_group} {timestamp}"
+
+            archive_group_name = args.archived_group or "Archived"
+            archive_group = next((g for g in kp.root_group.subgroups if g.name == archive_group_name), None)
+            if not archive_group:
+                archive_group = kp.add_group(kp.root_group, archive_group_name)
+                logging.info(f"Created '{archive_group_name}' group.")
+
+            logging.info(f"Archiving group '{args.root_group}' as '{archived_name}'.")
+            archived_group = kp.add_group(archive_group, archived_name)
+
+            kp.move_group(existing_group, archived_group)
 
     folders = subprocess.check_output(
         [args.bw_path, "list", "folders", "--session", args.bw_session], encoding="utf8"
@@ -268,6 +287,11 @@ parser.add_argument(
     "--root-group",
     help="Root group to store data from Bitwarden",
     default=os.environ.get("ROOT_GROUP", None),
+)
+parser.add_argument(
+    "--archived-group",
+    help="Archived group name to store old backups",
+    default=os.environ.get("ARCHIVED_GROUP", None),
 )
 args = parser.parse_args()
 
